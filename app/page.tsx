@@ -1,25 +1,8 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { MapContainer as LeafletMapContainer } from "react-leaflet";
-
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((m) => m.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((m) => m.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((m) => m.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then((m) => m.Popup),
-  { ssr: false }
-);
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { LatLngExpression } from "leaflet";
 
 interface OutageData {
   meter_id: string;
@@ -41,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // โหลดข้อมูลทั้งหมดสำหรับ map
   useEffect(() => {
     const fetchAll = async () => {
       const res = await fetch("/api/check-all");
@@ -75,22 +59,24 @@ export default function Home() {
     }
   };
 
-  const center: [number, number] = result
+  const center: LatLngExpression = result
     ? [parseFloat(result.latitude), parseFloat(result.longitude)]
-    : [13.7563, 100.5018];
+    : [13.7563, 100.5018]; // Bangkok default
   const zoom = result ? 17 : 8;
 
   return (
     <div style={{ padding: "1rem", fontFamily: "sans-serif" }}>
       <h1>🔌 ตรวจสอบการดับไฟบ้าน</h1>
+      <p>กรอกหมายเลขเครื่องวัดหรือหมายเลขผู้ใช้ไฟฟ้า</p>
+
       <input
-        placeholder="หมายเลขเครื่องวัด"
+        placeholder="หมายเลขเครื่องวัด (meter id)"
         value={meterId}
         onChange={(e) => setMeterId(e.target.value)}
         style={{ margin: "0.5rem", padding: "0.5rem" }}
       />
       <input
-        placeholder="หมายเลขผู้ใช้ไฟฟ้า"
+        placeholder="หมายเลขผู้ใช้ไฟฟ้า (customer id)"
         value={customerId}
         onChange={(e) => setCustomerId(e.target.value)}
         style={{ margin: "0.5rem", padding: "0.5rem" }}
@@ -110,35 +96,35 @@ export default function Home() {
             borderRadius: "8px",
           }}
         >
+          <h3>📋 ผลการตรวจสอบ</h3>
           <p><strong>หม้อแปลง:</strong> {result.transformer_id}</p>
           <p><strong>สถานะ:</strong> 🔴 ไฟดับ</p>
           <p><strong>ตั้งแต่:</strong> {result.outage_start}</p>
-<p><strong>ถึง:</strong> {result.outage_end}</p>
-<p><strong>วันที่:</strong> {result.outage_date}</p>
-<p><strong>หมายเหตุ:</strong> {result.notes}</p>
-</div>
-)}
-  <div style={{ height: "500px", marginTop: "1rem" }}>
-    <MapContainer   center={center as LatLngExpression}
-  zoom={zoom}
-  style={{ height: "500px" }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {(result ? [result] : allData).map((item, idx) => (
-        <Marker
-          key={idx}
-          position={[parseFloat(item.latitude), parseFloat(item.longitude)]}
-        >
-          <Popup>
-            <strong>มิเตอร์:</strong> {item.meter_id} <br />
-            <strong>ผู้ใช้:</strong> {item.customer_id} <br />
-            <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
-            <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
-            <strong>วันที่:</strong> {item.outage_date}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  </div>
-</div>
-);
+          <p><strong>ถึง:</strong> {result.outage_end}</p>
+          <p><strong>วันที่:</strong> {result.outage_date}</p>
+          <p><strong>หมายเหตุ:</strong> {result.notes}</p>
+        </div>
+      )}
+
+      <div style={{ height: "500px", marginTop: "1rem" }}>
+        <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {(result ? [result] : allData).map((item, idx) => (
+            <Marker
+              key={idx}
+              position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
+            >
+              <Popup>
+                <strong>มิเตอร์:</strong> {item.meter_id} <br />
+                <strong>ผู้ใช้:</strong> {item.customer_id} <br />
+                <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
+                <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
+                <strong>วันที่:</strong> {item.outage_date}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    </div>
+  );
 }

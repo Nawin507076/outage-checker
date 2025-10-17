@@ -110,23 +110,26 @@ export default function Home() {
       )}
 
       <div style={{ height: "500px", marginTop: "1rem" }}>
-        <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {(result ? [result] : allData).map((item, idx) => (
-            <Marker
-              key={idx}
-              position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
-            >
-              <Popup>
-                <strong>มิเตอร์:</strong> {item.meter_id} <br />
-                <strong>ผู้ใช้:</strong> {item.customer_id} <br />
-                <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
-                <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
-                <strong>วันที่:</strong> {item.outage_date}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+  <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
+  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+  {Array.isArray(result ? [result] : allData) &&
+    (result ? [result] : allData).map((item, idx) => (
+      <Marker
+        key={idx}
+        position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
+      >
+        <Popup>
+          <strong>มิเตอร์:</strong> {item.meter_id} <br />
+          <strong>ผู้ใช้:</strong> {item.customer_id} <br />
+          <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
+          <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
+          <strong>วันที่:</strong> {item.outage_date}
+        </Popup>
+      </Marker>
+    ))
+  }
+</MapContainer>
+
       </div>
     </div>
   );

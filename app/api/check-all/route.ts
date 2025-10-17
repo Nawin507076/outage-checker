@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 
 interface OutageData {
@@ -13,7 +13,8 @@ interface OutageData {
   longitude: string;
 }
 
-export const runtime = "nodejs"; // บังคับให้ Vercel ใช้ Node.js runtime
+// บังคับให้รันใน Node.js runtime บน Vercel
+export const runtime = "nodejs";
 
 export async function GET() {
   try {
@@ -28,7 +29,7 @@ export async function GET() {
     const sheets = google.sheets({ version: "v4", auth });
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Sheet1!A2:I", // ถ้า sheet ของคุณชื่อ Sheet1 แบบอังกฤษ ใช้ตรง ๆ
+      range: "Sheet1!A2:I",
     });
 
     const headers = [
@@ -45,14 +46,20 @@ export async function GET() {
 
     const rows: string[][] = response.data.values || [];
     const data: OutageData[] = rows.map((r) => {
-      const obj: any = {};
+      const obj: Record<string, string> = {};
       headers.forEach((h, i) => (obj[h] = r[i] || ""));
-      return obj as OutageData;
+      return obj as unknown as OutageData;
     });
 
-    return NextResponse.json(data);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Cannot load data" }, { status: 500 });
+    return NextResponse.json({ success: true, total: data.length, data });
+  } catch (error) {
+    console.error("❌ Error fetching data:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
+}
+
+// สำหรับรองรับ POST (optional)
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  return NextResponse.json({ status: "ok", received: body });
 }

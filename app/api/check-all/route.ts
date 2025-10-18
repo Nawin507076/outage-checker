@@ -11,6 +11,8 @@ interface OutageData {
   notes: string;
   latitude: string;
   longitude: string;
+  name: string;
+  location: string;
 }
 
 // บังคับให้รันใน Node.js runtime บน Vercel
@@ -29,7 +31,7 @@ export async function GET() {
     const sheets = google.sheets({ version: "v4", auth });
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Sheet1!A2:I",
+      range: "Sheet1!A2:K",
     });
 
     const headers = [
@@ -42,6 +44,8 @@ export async function GET() {
       "notes",
       "latitude",
       "longitude",
+      "name",
+      "location"
     ];
 
     const rows: string[][] = response.data.values || [];

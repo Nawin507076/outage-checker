@@ -10,4 +10,6 @@ export interface OutageData {
   notes: string;
   latitude: string;
   longitude: string;
+  name: string;
+  location: string;
 }

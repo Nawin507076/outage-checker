@@ -15,6 +15,8 @@ interface OutageData {
   notes: string;
   latitude: string;
   longitude: string;
+  name: string;
+  location: string;
 }
 
 const redIcon = L.icon({
@@ -53,6 +55,8 @@ export default function MapView({ data, center, zoom }: MapViewProps) {
             <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
             <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
             <strong>วันที่:</strong> {item.outage_date}
+            <strong>ชื่อผู้ใช้ไฟฟ้า:</strong> {item.name}
+            <strong>สถานที่ใช้ไฟฟ้า:</strong> {item.location}
           </Popup>
         </Marker>
       ))}

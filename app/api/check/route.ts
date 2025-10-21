@@ -14,7 +14,7 @@ interface OutageData {
   notes: string;
   latitude: string;
   longitude: string;
-    name: string;
+  name: string;
   location: string;
 }
 

@@ -43,23 +43,23 @@ export default function MapView({ data, center, zoom }: MapViewProps) {
   return (
     <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {safeData.map((item, idx) => (
-        <Marker
-          key={idx}
-          position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
-          icon={redIcon}
-        >
-          <Popup>
-            <strong>มิเตอร์:</strong> {item.meter_id} <br />
-            <strong>ผู้ใช้:</strong> {item.customer_id} <br />
-            <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
-            <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
-            <strong>วันที่:</strong> {item.outage_date}
-            <strong>ชื่อผู้ใช้ไฟฟ้า:</strong> {item.name}
-            <strong>สถานที่ใช้ไฟฟ้า:</strong> {item.location}
-          </Popup>
-        </Marker>
-      ))}
+{(safeData || []).map((item, idx) => (
+  <Marker
+    key={idx}
+    position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
+    icon={redIcon}
+  >
+    <Popup>
+      <strong>มิเตอร์:</strong> {item.meter_id} <br />
+      <strong>ผู้ใช้:</strong> {item.customer_id} <br />
+      <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
+      <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
+      <strong>วันที่:</strong> {item.outage_date} <br />
+      <strong>ชื่อผู้ใช้ไฟฟ้า:</strong> {item.name} <br />
+      <strong>สถานที่ใช้ไฟฟ้า:</strong> {item.location}
+    </Popup>
+  </Marker>
+))}
     </MapContainer>
   );
 }

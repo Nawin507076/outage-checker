@@ -86,7 +86,7 @@ export default function Home() {
   return (
     <div style={{ padding: "1rem" }}>
       {/* หัวข้อ */}
-      <h1
+      {/* <h1
         style={{
           fontSize: "2rem",
           fontWeight: "bold",
@@ -96,7 +96,37 @@ export default function Home() {
         }}
       >
         🔌 ตรวจสอบพื้นที่ไฟดับ
-      </h1>
+      </h1> */}
+      <header className="bg-white text-purple-700 flex items-center justify-between p-4 shadow-md mb-4">
+  <div className="flex items-center">
+    {/* รูปมัสคอต */}
+    <img 
+      src="PEA_65-Logo.png" 
+      alt="PEA Logo" 
+      className="h-12 w-18 mr-2"
+    />
+<h1 className="text-2xl font-bold text-peaPurple">
+  ตรวจสอบพื้นที่ไฟดับ
+</h1>
+
+
+  </div>
+
+  {/* ไอคอน social header ถ้าต้องการ */}
+  <div className="hidden md:flex space-x-4">
+    <a href="https://www.facebook.com/PEAOfficial" target="_blank" rel="noopener noreferrer" title="Facebook">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M22 12.073c0-5.523-4.477-10-10-10S2 6.55 2 12.073c0 4.991 3.657 9.128 8.438 9.879v-6.987h-2.54v-2.892h2.54v-2.21c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.63.771-1.63 1.562v1.882h2.773l-.443 2.892h-2.33v6.987C18.343 21.201 22 17.064 22 12.073z"/>
+      </svg>
+    </a>
+    <a href="https://line.me/R/ti/p/@yourlineid" target="_blank" rel="noopener noreferrer" title="Line">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.135 2 11.045c0 2.846 1.397 5.393 3.624 7.085V22l3.48-1.91c.936.263 1.928.405 2.896.405 5.523 0 10-4.135 10-9.045S17.523 2 12 2zm0 16c-.967 0-1.911-.149-2.823-.437l-.393-.142-2.07 1.138.507-2.97-.128-.414C6.152 15.398 6 14.735 6 14c0-3.86 3.582-7 8-7s8 3.14 8 7-3.582 7-8 7z"/>
+      </svg>
+    </a>
+  </div>
+</header>
+
 
       {/* Input */}
       <input
@@ -248,9 +278,42 @@ export default function Home() {
       )}
 
       {/* แผนที่ */}
-      <div style={{ height: "500px", marginTop: "1rem" }}>
+      <div style={{ height: "500px", marginTop: "1rem", marginBottom:"1rem"}}>
         <MapView data={result ? [result] : allData.data} center={center as any} zoom={zoom} />
       </div>
+<footer className="bg-white text-purple-700 p-6 text-center mt-auto border-t border-gray-200">
+  <div className="mb-2 text-peaPurple">
+    © 2025 การไฟฟ้าส่วนภูมิภาค สาขาสิงหนคร | เว็บไซต์ตรวจสอบไฟดับ
+  </div>
+
+  <div className="mt-4">
+    <span className="mr-2 font-semibold">ติดตามข่าวสารของเราผ่าน:</span>
+    <a
+      href="https://www.facebook.com/PEAOfficial" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="mx-2 hover:text-purple-500 transition"
+      title="Facebook"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M22 12.073c0-5.523-4.477-10-10-10S2 6.55 2 12.073c0 4.991 3.657 9.128 8.438 9.879v-6.987h-2.54v-2.892h2.54v-2.21c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.63.771-1.63 1.562v1.882h2.773l-.443 2.892h-2.33v6.987C18.343 21.201 22 17.064 22 12.073z"/>
+      </svg>
+    </a>
+    <a
+      href="https://line.me/R/ti/p/@yourlineid" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="mx-2 hover:text-green-500 transition"
+      title="Line"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.135 2 11.045c0 2.846 1.397 5.393 3.624 7.085V22l3.48-1.91c.936.263 1.928.405 2.896.405 5.523 0 10-4.135 10-9.045S17.523 2 12 2zm0 16c-.967 0-1.911-.149-2.823-.437l-.393-.142-2.07 1.138.507-2.97-.128-.414C6.152 15.398 6 14.735 6 14c0-3.86 3.582-7 8-7s8 3.14 8 7-3.582 7-8 7z"/>
+      </svg>
+    </a>
+  </div>
+</footer>
+
+
     </div>
   );
 }

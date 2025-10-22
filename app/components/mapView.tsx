@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { LatLngExpression } from "leaflet";
@@ -33,33 +33,40 @@ const redIcon = L.icon({
 });
 
 interface MapViewProps {
-  data: OutageData[]; 
+  data: OutageData[];
   center: LatLngExpression;
   zoom: number;
 }
 
+function MapUpdater({ center, zoom }: { center: LatLngExpression; zoom: number }) {
+  const map = useMap();
+  map.flyTo(center, zoom, { animate: true, duration: 1.5 });
+  return null;
+}
+
 export default function MapView({ data, center, zoom }: MapViewProps) {
-  const safeData = Array.isArray(data) ? data : []; // fallback
+  const safeData = Array.isArray(data) ? data : [];
   return (
     <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-{(safeData || []).map((item, idx) => (
-  <Marker
-    key={idx}
-    position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
-    icon={redIcon}
-  >
-    <Popup>
-      <strong>มิเตอร์:</strong> {item.meter_id} <br />
-      <strong>ผู้ใช้:</strong> {item.customer_id} <br />
-      <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
-      <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
-      <strong>วันที่:</strong> {item.outage_date} <br />
-      <strong>ชื่อผู้ใช้ไฟฟ้า:</strong> {item.name} <br />
-      <strong>สถานที่ใช้ไฟฟ้า:</strong> {item.location}
-    </Popup>
-  </Marker>
-))}
+      <MapUpdater center={center} zoom={zoom} />
+      {safeData.map((item, idx) => (
+        <Marker
+          key={idx}
+          position={[parseFloat(item.latitude), parseFloat(item.longitude)] as LatLngExpression}
+          icon={redIcon}
+        >
+          <Popup>
+            <strong>มิเตอร์:</strong> {item.meter_id} <br />
+            <strong>ผู้ใช้:</strong> {item.customer_id} <br />
+            <strong>หม้อแปลง:</strong> {item.transformer_id} <br />
+            <strong>ดับ:</strong> {item.outage_start} - {item.outage_end} <br />
+            <strong>วันที่:</strong> {item.outage_date} <br />
+            <strong>ชื่อผู้ใช้ไฟฟ้า:</strong> {item.name} <br />
+            <strong>สถานที่ใช้ไฟฟ้า:</strong> {item.location}
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }

@@ -115,6 +115,7 @@ export default function Home() {
         onFocus={(e) => (e.currentTarget.style.borderColor = "#6c3483")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "#9b59b6")}
       />
+      หรือ
       <input
         placeholder="หมายเลขผู้ใช้ไฟฟ้า (customer id)"
         value={customerId}

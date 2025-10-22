@@ -2,13 +2,13 @@
   "name": "outage-checker",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "vercel-build": "npm install --legacy-peer-deps && next build",
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
+"scripts": {
+  "vercel-build": "pnpm install && next build",
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "eslint"
+},
   "dependencies": {
     "d3-geo": "^3.1.1",
     "googleapis": "^164.0.0",

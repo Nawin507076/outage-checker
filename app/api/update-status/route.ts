@@ -5,7 +5,8 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { transformer_id, status } = await req.json();
+    const { transformer_id, status, outage_date, outage_start, outage_end } =
+      await req.json();
 
     if (!transformer_id || !status) {
       return NextResponse.json(
@@ -14,54 +15,61 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ ตั้งค่า Auth (พร้อมสิทธิ์เขียน)
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
         private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       },
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"], // ต้องใช้สิทธิ์นี้!
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-
-    // ✅ โหลดข้อมูลเพื่อตรวจหาตำแหน่งแถวที่มี transformer_id นี้
     const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
+
     const readResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Sheet1!A2:Z",
     });
 
     const rows = readResponse.data.values || [];
-    const transformerIndex = 2; // สมมติ transformer_id อยู่คอลัมน์ C (A=0, B=1, C=2)
-    const locationIndex = 10; // สมมติ location อยู่คอลัมน์ K (A=0 ... K=10)
-    const statusCol = locationIndex + 1; // คอลัมน์ถัดไปจาก location
 
-    const updates = rows
+    // index ตามตัวอย่าง
+    const transformerIndex = 2; // C
+    const statusCol = 11;       // L
+    const outageDateCol = 12;   // F
+    const outageStartCol = 13;  // D
+    const outageEndCol = 14;    // E
+
+    const matchingRows = rows
       .map((row, i) => (row[transformerIndex] === transformer_id ? i + 2 : null))
-      .filter(Boolean);
+      .filter((n): n is number => n !== null);
 
-    if (updates.length === 0) {
+    if (matchingRows.length === 0) {
       return NextResponse.json({
         success: false,
         message: "Transformer not found",
       });
     }
 
-    // ✅ เขียนสถานะใหม่กลับเข้าไปทุกแถวที่เจอ
-    for (const rowNum of updates) {
-      const cell = `Sheet1!${String.fromCharCode(65 + statusCol)}${rowNum}`;
-      await sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: cell,
+    // ✅ เตรียม data ทั้งหมดใน request เดียว
+    const data = matchingRows.flatMap((rowNum) => [
+      { range: `Sheet1!L${rowNum}`, values: [[status]] },
+      { range: `Sheet1!F${rowNum}`, values: [[outage_date]] },
+      { range: `Sheet1!D${rowNum}`, values: [[outage_start]] },
+      { range: `Sheet1!E${rowNum}`, values: [[outage_end]] },
+    ]);
+
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
         valueInputOption: "USER_ENTERED",
-        requestBody: { values: [[status]] },
-      });
-    }
+        data,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      updated: updates.length,
+      updated: matchingRows.length,
     });
   } catch (error: any) {
     console.error("❌ Update Error:", error);

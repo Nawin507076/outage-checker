@@ -300,8 +300,8 @@ export default function Home() {
             <strong>สถานที่ใช้ไฟฟ้า:</strong> {result.location}
           </p>
               {/* ✅ Timeline ของ status */}
-<div className="mt-4 px-4">
-  <h4 className="mb-4 font-semibold text-lg text-gray-700 text-center">🕒 สถานะปัจจุบัน</h4>
+<div className="mt-4 px-4 border-t border-gray-300">
+  <h4 className="mb-4 font-semibold text-lg text-gray-700 text-center pt-2">🕒 สถานะปัจจุบัน</h4>
 
   <div className="flex flex-col sm:flex-row items-center w-full justify-between">
     {/* Step 0: วางแผนดับไฟ */}

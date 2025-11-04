@@ -8,24 +8,30 @@ export async function POST(req: Request) {
     const { transformer_id, status, outage_date, outage_start, outage_end } =
       await req.json();
 
-    if (!transformer_id || !status) {
+    if (!transformer_id || !status || !outage_date || !outage_start || !outage_end) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      },
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
+    // ✅ Base64 decode private key
+    const privateKey = Buffer.from(process.env.GOOGLE_PRIVATE_KEY_BASE64!, "base64").toString(
+      "utf-8"
+    );
+
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: Buffer.from(process.env.GOOGLE_PRIVATE_KEY_BASE64!, "base64").toString("utf-8"),
+  },
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
+
 
     const sheets = google.sheets({ version: "v4", auth });
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
 
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
     const readResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Sheet1!A2:Z",
@@ -33,32 +39,46 @@ export async function POST(req: Request) {
 
     const rows = readResponse.data.values || [];
 
-    // index ตามตัวอย่าง
+    // กำหนด index ของคอลัมน์
     const transformerIndex = 2; // C
     const statusCol = 11;       // L
     const outageDateCol = 12;   // F
     const outageStartCol = 13;  // D
     const outageEndCol = 14;    // E
 
-    const matchingRows = rows
+    // หาแถวที่ transformer_id ตรงกัน
+    const updates = rows
       .map((row, i) => (row[transformerIndex] === transformer_id ? i + 2 : null))
-      .filter((n): n is number => n !== null);
+      .filter((r): r is number => r !== null); // กรอง null
 
-    if (matchingRows.length === 0) {
+    if (updates.length === 0) {
       return NextResponse.json({
         success: false,
         message: "Transformer not found",
       });
     }
 
-    // ✅ เตรียม data ทั้งหมดใน request เดียว
-    const data = matchingRows.flatMap((rowNum) => [
-      { range: `Sheet1!L${rowNum}`, values: [[status]] },
-      { range: `Sheet1!F${rowNum}`, values: [[outage_date]] },
-      { range: `Sheet1!D${rowNum}`, values: [[outage_start]] },
-      { range: `Sheet1!E${rowNum}`, values: [[outage_end]] },
+    // ✅ เตรียม data สำหรับ batch update
+    const data = updates.flatMap((rowNum) => [
+      {
+        range: `Sheet1!${String.fromCharCode(65 + statusCol)}${rowNum}`,
+        values: [[status]],
+      },
+      {
+        range: `Sheet1!${String.fromCharCode(65 + outageDateCol)}${rowNum}`,
+        values: [[outage_date]],
+      },
+      {
+        range: `Sheet1!${String.fromCharCode(65 + outageStartCol)}${rowNum}`,
+        values: [[outage_start]],
+      },
+      {
+        range: `Sheet1!${String.fromCharCode(65 + outageEndCol)}${rowNum}`,
+        values: [[outage_end]],
+      },
     ]);
 
+    // ✅ batch update ทีเดียว
     await sheets.spreadsheets.values.batchUpdate({
       spreadsheetId,
       requestBody: {
@@ -69,7 +89,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      updated: matchingRows.length,
+      updated: updates.length,
     });
   } catch (error: any) {
     console.error("❌ Update Error:", error);

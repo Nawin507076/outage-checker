@@ -105,9 +105,9 @@ export default function Home() {
       alt="PEA Logo" 
       className="h-12 w-18 mr-2"
     />
-<h1 className="text-2xl font-bold text-peaPurple">
+<h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-peaPurple text-center sm:text-left leading-tight">
   ตรวจสอบพื้นที่ไฟดับ
-</h1>
+</h2>
 
 
   </div>
@@ -205,8 +205,32 @@ export default function Home() {
             }}
           >
             ⚡ พื้นที่ไฟฟ้าดับ:{" "}
-          
-           {`วันที่ ${allData.data[0].outage_date} เวลา ${allData.data[0].outage_start} ถึง ${allData.data[0].outage_end} บริเวณ ${shortLocation}`}
+           {/* {`วันที่ ${allData.data[0].outage_date} เวลา ${allData.data[0].outage_start} ถึง ${allData.data[0].outage_end} บริเวณ ${shortLocation}`} */}
+<span>
+  {Array.from(
+    new Map(
+      allData.data.map(item => [
+        `${item.outage_date}-${item.outage_start}-${item.outage_end}`,
+        item,
+      ])
+    ).values()
+  )
+    .sort((a, b) => {
+      const dateA = new Date(`${a.outage_date} ${a.outage_start}`).getTime();
+      const dateB = new Date(`${b.outage_date} ${b.outage_start}`).getTime();
+      return dateA - dateB;
+    })
+    .map(
+      (uniqueItem, index, arr) =>
+        `วันที่ ${uniqueItem.outage_date} เวลา ${uniqueItem.outage_start} ถึง ${uniqueItem.outage_end} บริเวณ ${shortLocation}${
+          index < arr.length - 1 ? "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0" : "" // ✅ เว้น 3 ช่องว่าง
+        }`
+    )
+    .join("")}
+</span>
+
+
+
           </div>
         </div>
       )}

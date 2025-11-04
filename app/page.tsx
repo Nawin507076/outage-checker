@@ -18,6 +18,7 @@ interface OutageData {
   longitude: string;
   name: string;
   location: string;
+  status: string;
 }
 
 interface AllDataResponse {
@@ -298,7 +299,98 @@ export default function Home() {
           <p>
             <strong>สถานที่ใช้ไฟฟ้า:</strong> {result.location}
           </p>
+              {/* ✅ Timeline ของ status */}
+<div className="mt-4 px-4">
+  <h4 className="mb-4 font-semibold text-lg text-gray-700 text-center">🕒 สถานะปัจจุบัน</h4>
+
+  <div className="flex flex-col sm:flex-row items-center w-full justify-between">
+    {/* Step 0: วางแผนดับไฟ */}
+    <div className="flex flex-col items-center flex-1">
+      <div
+        className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
+          result.status === "0" ? "bg-yellow-500 text-white" : "bg-gray-300 text-gray-500"
+        }`}
+      >
+        📋
+      </div>
+      <span
+        className={`text-center text-sm sm:text-base ${
+          result.status === "0" ? "text-gray-800" : "text-gray-400"
+        }`}
+      >
+        วางแผนดับไฟ
+      </span>
+      <div className="w-full h-1 mt-2">
+        <div
+          className={`h-1 rounded ${
+            result.status === "0" ? "bg-yellow-500" : "bg-gray-300"
+          }`}
+        ></div>
+      </div>
+    </div>
+
+    {/* Spacer */}
+    <div className="w-4 sm:w-8"></div>
+
+    {/* Step 1: กำลังดับไฟ */}
+    <div className="flex flex-col items-center flex-1 mt-4 sm:mt-0">
+      <div
+        className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
+          result.status === "1" ? "bg-purple-600 text-white" : "bg-gray-300 text-gray-500"
+        }`}
+      >
+        ⚒️
+      </div>
+      <span
+        className={`text-center text-sm sm:text-base ${
+          result.status === "1" ? "text-gray-800" : "text-gray-400"
+        }`}
+      >
+        กำลังดับไฟเพื่อปฏิบัติงาน
+      </span>
+      <div className="w-full h-1 mt-2">
+        <div
+          className={`h-1 rounded ${
+            result.status === "1" ? "bg-purple-600" : "bg-gray-300"
+          }`}
+        ></div>
+      </div>
+    </div>
+
+    {/* Spacer */}
+    <div className="w-4 sm:w-8"></div>
+
+    {/* Step 2: ดำเนินการเสร็จ */}
+    <div className="flex flex-col items-center flex-1 mt-4 sm:mt-0">
+      <div
+        className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
+          result.status === "2" ? "bg-green-500 text-white" : "bg-gray-300 text-gray-500"
+        }`}
+      >
+        ✅
+      </div>
+      <span
+        className={`text-center text-sm sm:text-base ${
+          result.status === "2" ? "text-gray-800" : "text-gray-400"
+        }`}
+      >
+        ดำเนินการแล้วเสร็จจ่ายไฟคืนแล้ว
+      </span>
+      <div className="w-full h-1 mt-2">
+        <div
+          className={`h-1 rounded ${
+            result.status === "2" ? "bg-green-500" : "bg-gray-300"
+          }`}
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
         </div>
+        
       )}
 
       {/* แผนที่ */}

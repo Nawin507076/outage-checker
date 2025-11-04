@@ -16,6 +16,7 @@ interface OutageData {
   longitude: string;
   name: string;
   location: string;
+  status: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -34,7 +35,7 @@ const auth = new google.auth.GoogleAuth({
     const sheets = google.sheets({ version: "v4", auth });
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Sheet1!A2:K",
+      range: "Sheet1!A2:L",
     });
 
     const headers = [
@@ -48,7 +49,8 @@ const auth = new google.auth.GoogleAuth({
       "latitude",
       "longitude",
       "name",
-      "location"
+      "location",
+      "status"
     ];
 
     const rows: string[][] = response.data.values || [];

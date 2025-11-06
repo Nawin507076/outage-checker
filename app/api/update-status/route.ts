@@ -8,16 +8,16 @@ export async function POST(req: Request) {
     const { transformer_id, status, outage_date, outage_start, outage_end } =
       await req.json();
 
-    if (!transformer_id || !status || !outage_date || !outage_start || !outage_end) {
+    // ✅ ตรวจเฉพาะฟิลด์ที่จำเป็น
+    if (!transformer_id || !status) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields" },
+        { success: false, message: "Missing required fields: transformer_id or status" },
         { status: 400 }
       );
     }
 
-    // ✅ Private Key แบบไม่ใช้ Base64
+    // ✅ เตรียม Auth สำหรับ Google Sheets
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -27,8 +27,9 @@ export async function POST(req: Request) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-
     const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
+
+    // ✅ อ่านข้อมูลจาก Sheet
     const readResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Sheet1!A2:Z",
@@ -36,12 +37,12 @@ export async function POST(req: Request) {
 
     const rows = readResponse.data.values || [];
 
-    // ✅ กำหนดตำแหน่งคอลัมน์ที่ถูกต้อง
-    const transformerIndex = 2;  // C
-    const outageStartCol = 3;    // D
-    const outageEndCol = 4;      // E
-    const outageDateCol = 5;     // F
-    const statusCol = 11;        // L
+    // ✅ กำหนดตำแหน่งคอลัมน์
+    const transformerIndex = 2; // C
+    const outageStartCol = 3;   // D
+    const outageEndCol = 4;     // E
+    const outageDateCol = 5;    // F
+    const statusCol = 11;       // L
 
     // ✅ หาแถวที่มี transformer_id ตรงกัน
     const updates = rows
@@ -55,27 +56,30 @@ export async function POST(req: Request) {
       });
     }
 
-    // ✅ เตรียมข้อมูล batch update
+    // ✅ ฟังก์ชันช่วยทำความสะอาดค่า (ให้ค่าว่างแทน null)
+    const clean = (value: any) => (value === null || value === undefined ? "" : value);
+
+    // ✅ เตรียมข้อมูลอัปเดต
     const data = updates.flatMap((rowNum) => [
       {
         range: `Sheet1!${String.fromCharCode(65 + statusCol)}${rowNum}`,
-        values: [[status]],
+        values: [[clean(status)]],
       },
       {
         range: `Sheet1!${String.fromCharCode(65 + outageDateCol)}${rowNum}`,
-        values: [[outage_date]],
+        values: [[clean(outage_date)]],
       },
       {
         range: `Sheet1!${String.fromCharCode(65 + outageStartCol)}${rowNum}`,
-        values: [[outage_start]],
+        values: [[clean(outage_start)]],
       },
       {
         range: `Sheet1!${String.fromCharCode(65 + outageEndCol)}${rowNum}`,
-        values: [[outage_end]],
+        values: [[clean(outage_end)]],
       },
     ]);
 
-    // ✅ Update ทีเดียวไม่ต้องเขียนแถวละคำสั่ง
+    // ✅ batch update ทีเดียว
     await sheets.spreadsheets.values.batchUpdate({
       spreadsheetId,
       requestBody: {
@@ -88,7 +92,6 @@ export async function POST(req: Request) {
       success: true,
       updated: updates.length,
     });
-
   } catch (error: any) {
     console.error("❌ Update Error:", error);
     return NextResponse.json(
